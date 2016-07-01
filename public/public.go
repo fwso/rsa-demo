@@ -59,7 +59,7 @@ func main() {
 
 	publicKeyI, err := x509.ParsePKIXPublicKey(block.Bytes)
 	if err != nil {
-		fmt.Println("Error: failed to parse public key")
+		fmt.Printf("Error: failed to parse public key: %v\n", err)
 		os.Exit(2)
 	}
 	publicKey, ok := publicKeyI.(*rsa.PublicKey)
@@ -68,9 +68,11 @@ func main() {
 		os.Exit(3)
 	}
 	randR := rand.Reader
-	enc, err2 := rsa.EncryptPKCS1v15(randR, publicKey, []byte(message))
-	if err2 != nil {
-		fmt.Println("Error: failed to encrypt message")
+	plain := []byte(message)
+	enc, eerr := rsa.EncryptPKCS1v15(randR, publicKey, plain)
+	if eerr != nil {
+		fmt.Printf("Error: failed to encrypt message(len: %d): %v\n", len(plain), eerr)
+		fmt.Printf(`Note: RSAES-PKCS1-v1_5 can operate on messages of length up to k - 11 octets (k is the octet length of the RSA modulus)`)
 		os.Exit(4)
 	}
 
